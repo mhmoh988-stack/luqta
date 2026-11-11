@@ -1,0 +1,849 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>لُقطة — ذاكرتك الثانية</title>
+<meta name="theme-color" content="#F5F1EA">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="لُقطة">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Readex+Pro:wght@300;400;500;600;700&family=Reem+Kufi:wght@500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#F5F1EA; --card:#FFFDF9; --ink:#1E1A16; --ink2:#5E564D; --ink3:#8F867B;
+  --line:#E4DDD2; --accent:#D9572B; --accent-soft:#FBE7DE; --deep:#1F3B36; --deep-soft:#E3ECE8;
+  --r:16px; --shadow:0 1px 2px rgba(30,26,22,.05),0 6px 20px rgba(30,26,22,.06);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{background:var(--paper);color:var(--ink);font-family:"Readex Pro",system-ui,sans-serif;font-size:15px;line-height:1.6}
+button,input,textarea,select{font:inherit;color:inherit}
+button{cursor:pointer;border:none;background:none}
+a{color:inherit}
+.wrap{max-width:1120px;margin:0 auto;padding:0 20px 120px}
+
+/* header */
+header{position:sticky;top:0;z-index:20;background:rgba(245,241,234,.92);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+.hbar{max-width:1120px;margin:0 auto;padding:14px 20px;display:flex;align-items:center;gap:18px}
+.logo{font-family:"Reem Kufi",sans-serif;font-size:26px;font-weight:700;letter-spacing:0;display:flex;align-items:center;gap:8px}
+.logo i{width:12px;height:12px;border-radius:50%;background:var(--accent);display:inline-block;box-shadow:16px 0 0 var(--deep)}
+.logo small{font-family:"Readex Pro";font-size:12px;color:var(--ink3);font-weight:400;margin-inline-start:22px}
+nav.tabs{display:flex;gap:4px;margin-inline-start:auto;background:#EBE5DB;padding:4px;border-radius:999px}
+nav.tabs button{padding:7px 16px;border-radius:999px;font-size:14px;color:var(--ink2);display:flex;align-items:center;gap:6px}
+nav.tabs button.on{background:var(--card);color:var(--ink);box-shadow:var(--shadow);font-weight:500}
+.status{font-size:11px;color:var(--ink3);display:flex;align-items:center;gap:5px;white-space:nowrap}
+.status b{width:7px;height:7px;border-radius:50%;background:#C9BFB2;display:inline-block}
+.status.ok b{background:#3C9A6B}
+
+/* buttons */
+.btn{display:inline-flex;align-items:center;gap:8px;padding:10px 18px;border-radius:999px;font-weight:500;font-size:14px;transition:.15s}
+.btn.primary{background:var(--ink);color:#fff}
+.btn.primary:hover{background:#000}
+.btn.accent{background:var(--accent);color:#fff}
+.btn.ghost{background:var(--card);border:1px solid var(--line)}
+.btn.ghost:hover{border-color:var(--ink3)}
+.btn:disabled{opacity:.5;cursor:default}
+.btn svg{width:16px;height:16px}
+.fab{position:fixed;bottom:26px;left:26px;z-index:30;width:62px;height:62px;border-radius:50%;background:var(--accent);color:#fff;box-shadow:0 10px 30px rgba(217,87,43,.4);display:grid;place-items:center;transition:.2s}
+.fab:hover{transform:scale(1.06)}
+.fab svg{width:28px;height:28px}
+
+/* sections */
+.view{display:none;padding-top:26px}
+.view.on{display:block}
+h1.big{font-family:"Reem Kufi";font-size:34px;line-height:1.25;font-weight:700}
+.sub{color:var(--ink2);margin-top:4px}
+.row{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+
+/* resurfacer */
+.resurface{margin:22px 0 18px;background:var(--deep);color:#F1ECE4;border-radius:22px;padding:20px 22px;display:flex;gap:18px;align-items:center;position:relative;overflow:hidden}
+.resurface::after{content:"";position:absolute;inset:auto auto -60px -40px;width:200px;height:200px;border-radius:50%;background:rgba(255,255,255,.05)}
+.resurface .thumb{width:84px;height:84px;border-radius:14px;flex:none;background:#2C4D47 center/cover;display:grid;place-items:center;font-size:30px}
+.resurface .k{font-size:12px;color:#A8C3BC;letter-spacing:.3px}
+.resurface h3{font-size:18px;font-weight:500;margin:2px 0 4px}
+.resurface p{font-size:13px;color:#C8D6D2;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.resurface .acts{margin-inline-start:auto;display:flex;gap:8px;flex:none;z-index:1}
+.resurface .btn.ghost{background:transparent;border-color:#44655F;color:#F1ECE4}
+.resurface .btn.light{background:#F1ECE4;color:var(--deep)}
+
+/* search & chips */
+.search{position:relative;margin:18px 0 12px}
+.search input{width:100%;padding:14px 48px 14px 18px;border-radius:999px;border:1px solid var(--line);background:var(--card);outline:none;font-size:15px}
+.search input:focus{border-color:var(--ink3)}
+.search svg{position:absolute;right:18px;top:50%;transform:translateY(-50%);width:18px;color:var(--ink3)}
+.chips{display:flex;gap:8px;overflow-x:auto;padding-bottom:6px;scrollbar-width:none}
+.chip{flex:none;padding:6px 14px;border-radius:999px;border:1px solid var(--line);background:var(--card);font-size:13px;color:var(--ink2);display:flex;gap:6px;align-items:center}
+.chip .dot{width:8px;height:8px;border-radius:50%}
+.chip em{font-style:normal;color:var(--ink3);font-size:11px}
+.chip.on{background:var(--ink);color:#fff;border-color:var(--ink)}
+.chip.on em{color:#bbb}
+
+/* grid */
+.grid{columns:4 240px;column-gap:16px;margin-top:16px}
+.item{break-inside:avoid;margin-bottom:16px;background:var(--card);border-radius:var(--r);box-shadow:var(--shadow);overflow:hidden;cursor:pointer;transition:.15s;border:1px solid transparent}
+.item:hover{transform:translateY(-2px);border-color:var(--line)}
+.item img{width:100%;display:block;max-height:320px;object-fit:cover}
+.item .b{padding:14px 15px 15px}
+.item .cat{font-size:11px;font-weight:500;display:inline-flex;align-items:center;gap:5px;padding:2px 9px;border-radius:999px}
+.item h4{font-size:15px;font-weight:500;margin:8px 0 4px;line-height:1.45}
+.item p{font-size:13px;color:var(--ink2);display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.item .meta{display:flex;justify-content:space-between;align-items:center;margin-top:10px;font-size:11px;color:var(--ink3)}
+.item .tags{display:flex;flex-wrap:wrap;gap:4px;margin-top:8px}
+.tag{font-size:11px;color:var(--ink2);background:#F0EBE3;padding:1px 8px;border-radius:6px}
+.item.idea{background:linear-gradient(160deg,#FFF6EF,#FFFDF9);border-color:#F3D6C8}
+.empty{text-align:center;padding:60px 20px;color:var(--ink2)}
+.empty .art{font-size:54px;margin-bottom:12px}
+.empty h3{font-family:"Reem Kufi";font-size:24px;color:var(--ink);margin-bottom:6px}
+
+/* insights */
+.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin:22px 0}
+.kpi{background:var(--card);border-radius:var(--r);padding:18px;box-shadow:var(--shadow)}
+.kpi .n{font-family:"Reem Kufi";font-size:34px;line-height:1.1}
+.kpi .l{font-size:12px;color:var(--ink2);margin-top:4px}
+.panels{display:grid;grid-template-columns:1.3fr 1fr;gap:16px}
+.panel{background:var(--card);border-radius:var(--r);padding:20px;box-shadow:var(--shadow)}
+.panel h3{font-size:15px;font-weight:600;margin-bottom:14px;display:flex;align-items:center;justify-content:space-between}
+.panel h3 small{font-weight:400;color:var(--ink3);font-size:12px}
+.bars .r{display:grid;grid-template-columns:110px 1fr 36px;gap:10px;align-items:center;margin-bottom:10px;font-size:13px}
+.bars .t{height:12px;background:#F0EBE3;border-radius:6px;overflow:hidden}
+.bars .t i{display:block;height:100%;border-radius:6px}
+.bars .v{color:var(--ink3);font-size:12px;text-align:left}
+.weeks{display:flex;align-items:flex-end;gap:8px;height:140px;padding-top:10px}
+.weeks .c{flex:1;display:flex;flex-direction:column;align-items:center;gap:6px;height:100%;justify-content:flex-end}
+.weeks .c i{width:100%;max-width:34px;background:var(--deep);border-radius:6px 6px 2px 2px;min-height:3px}
+.weeks .c.now i{background:var(--accent)}
+.weeks .c span{font-size:10px;color:var(--ink3)}
+.weeks .c b{font-size:11px;font-weight:500;color:var(--ink2)}
+.cloud{display:flex;flex-wrap:wrap;gap:8px;align-items:baseline}
+.cloud span{color:var(--deep);line-height:1.2}
+.insight-hero{background:var(--accent-soft);border-radius:22px;padding:22px;margin-top:16px;display:flex;gap:16px;align-items:flex-start}
+.insight-hero .ic{font-size:30px}
+.insight-hero h3{font-size:17px;font-weight:600}
+.insight-hero p{color:#6B3A26;font-size:14px;margin-top:2px}
+.portrait{margin-top:16px;white-space:pre-wrap;line-height:1.9;font-size:15px}
+.forgot{display:flex;flex-direction:column;gap:10px}
+.forgot .f{display:flex;gap:12px;align-items:center;padding:8px;border-radius:12px;cursor:pointer}
+.forgot .f:hover{background:#F6F2EB}
+.forgot .f .th{width:46px;height:46px;border-radius:10px;background:#EFE9E0 center/cover;flex:none;display:grid;place-items:center;font-size:20px}
+.forgot .f h5{font-size:13px;font-weight:500}
+.forgot .f span{font-size:11px;color:var(--ink3)}
+
+/* lab */
+.lab{display:grid;grid-template-columns:1fr 1.3fr;gap:16px;margin-top:22px}
+.picklist{max-height:440px;overflow-y:auto;display:flex;flex-direction:column;gap:6px;margin-top:10px}
+.pick{display:flex;gap:10px;align-items:center;padding:8px 10px;border-radius:12px;border:1px solid var(--line);cursor:pointer;font-size:13px;background:#fff}
+.pick.on{border-color:var(--accent);background:var(--accent-soft)}
+.pick .th{width:36px;height:36px;border-radius:8px;background:#EFE9E0 center/cover;flex:none;display:grid;place-items:center}
+.pick .tx{flex:1;min-width:0}
+.pick .tx b{font-weight:500;display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pick .tx span{font-size:11px;color:var(--ink3)}
+.ideas{display:flex;flex-direction:column;gap:12px}
+.idea-card{background:var(--card);border-radius:var(--r);padding:18px;box-shadow:var(--shadow);border-inline-start:4px solid var(--accent)}
+.idea-card h4{font-size:16px;font-weight:600}
+.idea-card p{font-size:14px;color:var(--ink2);margin-top:6px}
+.idea-card .why{font-size:12px;color:var(--deep);background:var(--deep-soft);padding:8px 10px;border-radius:10px;margin-top:10px}
+.idea-card ol{margin:10px 22px 0 0;font-size:13px;color:var(--ink2)}
+.idea-card .row{margin-top:12px}
+.ask{margin-top:16px}
+.ask textarea{width:100%;min-height:80px;border:1px solid var(--line);border-radius:14px;padding:12px 14px;background:#fff;outline:none;resize:vertical}
+.answer{margin-top:12px;white-space:pre-wrap;line-height:1.9;font-size:14px}
+.selected-bar{display:flex;gap:6px;flex-wrap:wrap;margin:10px 0}
+.loading{display:flex;align-items:center;gap:10px;color:var(--ink2);font-size:14px;padding:16px 0}
+.spin{width:18px;height:18px;border:2px solid var(--line);border-top-color:var(--accent);border-radius:50%;animation:sp 0.8s linear infinite}
+@keyframes sp{to{transform:rotate(360deg)}}
+
+/* modal */
+.scrim{position:fixed;inset:0;background:rgba(30,26,22,.45);z-index:50;display:none;align-items:center;justify-content:center;padding:16px}
+.scrim.on{display:flex}
+.modal{background:var(--paper);border-radius:24px;width:100%;max-width:560px;max-height:92vh;overflow-y:auto;padding:24px;position:relative;animation:pop .2s}
+@keyframes pop{from{transform:translateY(12px);opacity:0}}
+.modal h2{font-family:"Reem Kufi";font-size:24px;margin-bottom:14px}
+.x{position:absolute;top:16px;left:16px;width:34px;height:34px;border-radius:50%;background:#EBE5DB;display:grid;place-items:center;font-size:18px}
+.seg{display:flex;background:#EBE5DB;border-radius:14px;padding:4px;gap:4px;margin-bottom:16px}
+.seg button{flex:1;padding:9px;border-radius:10px;font-size:14px;color:var(--ink2)}
+.seg button.on{background:var(--card);color:var(--ink);font-weight:500;box-shadow:var(--shadow)}
+label.f{display:block;font-size:13px;color:var(--ink2);margin:12px 0 6px}
+.inp{width:100%;padding:12px 14px;border:1px solid var(--line);border-radius:12px;background:#fff;outline:none}
+.inp:focus{border-color:var(--ink3)}
+textarea.inp{min-height:110px;resize:vertical}
+.drop{border:2px dashed #D3C9BB;border-radius:16px;padding:28px;text-align:center;color:var(--ink2);cursor:pointer;background:#FBF8F3}
+.drop.over{border-color:var(--accent);background:var(--accent-soft)}
+.drop img{max-width:100%;max-height:260px;border-radius:10px;display:block;margin:0 auto}
+.hint{font-size:12px;color:var(--ink3);margin-top:8px}
+.mfoot{display:flex;gap:10px;justify-content:flex-start;margin-top:20px;align-items:center}
+.detail img.full{width:100%;border-radius:14px;margin-bottom:14px}
+.detail .ttl{font-size:20px;font-weight:600;width:100%;border:none;background:transparent;outline:none;padding:0;line-height:1.4}
+.detail .sum{font-size:14px;color:var(--ink2);margin-top:6px}
+.detail .content{margin-top:14px;background:var(--card);padding:14px;border-radius:12px;font-size:14px;white-space:pre-wrap;max-height:220px;overflow:auto}
+.confirm{background:#FCE4DC;border-radius:12px;padding:12px;margin-top:12px;display:none;font-size:13px}
+.confirm.on{display:block}
+
+.toast{position:fixed;bottom:100px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--ink);color:#fff;padding:12px 20px;border-radius:999px;font-size:14px;z-index:60;opacity:0;transition:.25s;pointer-events:none;white-space:nowrap}
+.toast.on{opacity:1;transform:translateX(-50%) translateY(0)}
+
+#auth{position:fixed;inset:0;z-index:80;background:var(--paper);display:none;align-items:center;justify-content:center;padding:20px}
+#auth.on{display:flex}
+#auth .box{width:100%;max-width:400px;text-align:center}
+#auth .logo{justify-content:center;font-size:44px;margin-bottom:6px}
+#auth form{text-align:start;margin-top:24px;background:var(--card);padding:22px;border-radius:22px;box-shadow:var(--shadow)}
+#auth .msg{font-size:13px;margin-top:12px;min-height:20px;color:var(--accent)}
+.out{font-size:12px;color:var(--ink3);text-decoration:underline}
+@media (max-width:820px){
+  .hbar{flex-wrap:wrap;gap:10px}
+  .logo small{display:none}
+  nav.tabs{order:3;width:100%;margin:0}
+  nav.tabs button{flex:1;justify-content:center;padding:8px 6px;font-size:13px}
+  .kpis{grid-template-columns:repeat(2,1fr)}
+  .panels,.lab{grid-template-columns:1fr}
+  .resurface{flex-wrap:wrap}
+  .resurface .acts{margin:0;width:100%}
+  h1.big{font-size:27px}
+  .grid{columns:2 150px;column-gap:12px}
+  .bars .r{grid-template-columns:90px 1fr 30px}
+}
+</style>
+</head>
+<body>
+<header>
+  <div class="hbar">
+    <div class="logo"><i></i>لُقطة<small>كل ما يلفت انتباهك، في مكان واحد</small></div>
+    <nav class="tabs">
+      <button data-v="library" class="on">مكتبتي</button>
+      <button data-v="insights">اعرف نفسك</button>
+      <button data-v="lab">مختبر الأفكار</button>
+    </nav>
+    <div class="status" id="status"><b></b><span>جاري الاتصال…</span> · <button class="out" id="logout">خروج</button></div>
+  </div>
+</header>
+
+<div class="wrap">
+  <!-- LIBRARY -->
+  <section class="view on" id="v-library">
+    <h1 class="big" id="greet">مكتبتك</h1>
+    <p class="sub" id="greetSub">احفظ أي شيء يلفت انتباهك، ونحن نرتّبه.</p>
+    <div id="resurface"></div>
+    <div class="search">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+      <input id="q" placeholder="ابحث في كل ما حفظته… عنوان، وسم، أو نص داخل صورة">
+    </div>
+    <div class="chips" id="chips"></div>
+    <div class="grid" id="grid"></div>
+    <div id="emptyLib"></div>
+  </section>
+
+  <!-- INSIGHTS -->
+  <section class="view" id="v-insights">
+    <h1 class="big">اعرف نفسك</h1>
+    <p class="sub">ما تحفظه يقول عنك أكثر مما تظن.</p>
+    <div id="insightsBody"></div>
+  </section>
+
+  <!-- LAB -->
+  <section class="view" id="v-lab">
+    <h1 class="big">مختبر الأفكار</h1>
+    <p class="sub">اجمع لقطات من عوالم مختلفة، ودع الأفكار الجديدة تولد من التقاطع بينها.</p>
+    <div class="lab">
+      <div class="panel">
+        <h3>اختر من ٢ إلى ٥ لقطات <small id="pickCount">٠ مختارة</small></h3>
+        <div class="row">
+          <button class="btn ghost" id="randomMix">🎲 خلطة عشوائية</button>
+          <button class="btn ghost" id="clearPick">مسح</button>
+        </div>
+        <div class="picklist" id="picklist"></div>
+      </div>
+      <div>
+        <div class="panel">
+          <h3>الأفكار المولّدة</h3>
+          <div class="selected-bar" id="selBar"></div>
+          <button class="btn accent" id="genIdeas">✨ ولّد أفكاراً جديدة</button>
+          <div id="ideasOut" style="margin-top:14px"></div>
+        </div>
+        <div class="panel ask">
+          <h3>اسأل محفوظاتك</h3>
+          <textarea id="askQ" placeholder="مثال: أعطني ٥ أفكار محتوى من الأشياء التي حفظتها عن التسويق"></textarea>
+          <div class="row" style="margin-top:10px"><button class="btn primary" id="askBtn">اسأل</button></div>
+          <div class="answer" id="askOut"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<button class="fab" id="fab" title="لقطة جديدة"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></button>
+
+<!-- ADD MODAL -->
+<div class="scrim" id="addScrim">
+  <div class="modal">
+    <button class="x" data-close>×</button>
+    <h2>لقطة جديدة</h2>
+    <div class="seg" id="addSeg">
+      <button data-t="image" class="on">📸 صورة / سكرين شوت</button>
+      <button data-t="link">🔗 رابط</button>
+      <button data-t="note">✍️ نص أو فكرة</button>
+    </div>
+    <div data-pane="image">
+      <div class="drop" id="drop">
+        <div id="dropInner"><div style="font-size:34px">🖼️</div>اسحب الصورة هنا، أو اضغط للاختيار<div class="hint">يمكنك أيضاً لصقها مباشرة (Ctrl/⌘ + V)</div></div>
+      </div>
+      <input type="file" id="file" accept="image/*" hidden>
+    </div>
+    <div data-pane="link" hidden>
+      <label class="f">الرابط</label>
+      <input class="inp" id="linkUrl" placeholder="https://…" dir="ltr">
+    </div>
+    <div data-pane="note" hidden>
+      <label class="f">النص</label>
+      <textarea class="inp" id="noteText" placeholder="اقتباس، فكرة، فقرة من مقال…"></textarea>
+    </div>
+    <label class="f" id="whyLbl">لماذا لفت انتباهك؟ (اختياري — يساعد في التصنيف)</label>
+    <input class="inp" id="addWhy" placeholder="مثال: ألوان جميلة لهوية مشروعي">
+    <div class="mfoot">
+      <button class="btn primary" id="saveBtn">احفظ وصنّف</button>
+      <span class="hint" id="aiNote"></span>
+    </div>
+  </div>
+</div>
+
+<!-- DETAIL MODAL -->
+<div class="scrim" id="detScrim">
+  <div class="modal detail" id="detail"></div>
+</div>
+
+<div id="auth"><div class="box">
+  <div class="logo"><i></i>لُقطة</div>
+  <p class="sub">كل ما يلفت انتباهك، في مكان واحد.</p>
+  <form id="authForm">
+    <label class="f">البريد الإلكتروني</label>
+    <input class="inp" id="aEmail" type="email" dir="ltr" required autocomplete="email">
+    <label class="f">كلمة المرور</label>
+    <input class="inp" id="aPass" type="password" dir="ltr" required minlength="6" autocomplete="current-password">
+    <div class="row" style="margin-top:18px">
+      <button class="btn primary" type="submit" id="aIn">دخول</button>
+      <button class="btn ghost" type="button" id="aUp">حساب جديد</button>
+    </div>
+    <div class="msg" id="aMsg"></div>
+  </form>
+</div></div>
+<div class="toast" id="toast"></div>
+
+<script>
+/* ===================== constants ===================== */
+const CATS = {
+  "تصميم":{c:"#D9572B",e:"🎨"}, "تقنية":{c:"#3D6FB6",e:"💻"}, "ريادة أعمال":{c:"#1F3B36",e:"🚀"},
+  "تسويق":{c:"#C2417A",e:"📣"}, "كتابة ومحتوى":{c:"#7A5AC8",e:"✍️"}, "فن وإلهام":{c:"#D79A1E",e:"✨"},
+  "تطوير الذات":{c:"#2E8B6A",e:"🌱"}, "صحة ورياضة":{c:"#4FA35A",e:"💪"}, "طبخ":{c:"#B4532F",e:"🍳"},
+  "سفر وأماكن":{c:"#2A93A8",e:"🧭"}, "مال واستثمار":{c:"#6B7F2A",e:"💰"}, "علوم ومعرفة":{c:"#5466A8",e:"🔬"},
+  "أفكاري":{c:"#E07A3F",e:"💡"}, "أخرى":{c:"#8F867B",e:"📌"}
+};
+const CAT_NAMES = Object.keys(CATS).filter(c=>c!=="أفكاري");
+const KEYWORDS = {
+  "تصميم":["تصميم","ui","ux","design","figma","لوقو","logo","هوية","خط","font","typography","color","ألوان","palette","layout","واجهة","dribbble","behance"],
+  "تقنية":["برمجة","code","ai","ذكاء اصطناعي","تقنية","tech","app","تطبيق","github","python","javascript","api","software","gpt","claude"],
+  "ريادة أعمال":["ريادة","startup","مشروع","شركة","business","مؤسس","founder","استثمار جريء","منتج","product","saas","عملاء"],
+  "تسويق":["تسويق","marketing","إعلان","brand","براند","سوشيال","social","seo","حملة","محتوى تسويقي","growth","نمو","مبيعات"],
+  "كتابة ومحتوى":["كتابة","writing","مقال","article","قصة","محتوى","بودكاست","podcast","يوتيوب","newsletter","كاتب","رواية"],
+  "فن وإلهام":["فن","art","إلهام","inspiration","لوحة","رسم","تصوير","photography","موسيقى","سينما","فيلم","illustration","aesthetic"],
+  "تطوير الذات":["عادات","habit","إنتاجية","productivity","تحفيز","تطوير","وقت","تأمل","mindset","نجاح","تعلم","كتاب","قراءة"],
+  "صحة ورياضة":["صحة","رياضة","تمارين","workout","gym","نوم","تغذية","fitness","جري","يوغا","health"],
+  "طبخ":["وصفة","طبخ","recipe","أكل","food","حلى","قهوة","coffee","مطعم","طبق"],
+  "سفر وأماكن":["سفر","travel","رحلة","مدينة","فندق","مكان","طبيعة","شاطئ","جبل","trip"],
+  "مال واستثمار":["مال","استثمار","invest","أسهم","stock","ادخار","ميزانية","finance","كريبتو","crypto","عقار"],
+  "علوم ومعرفة":["علم","science","تاريخ","history","فيزياء","فضاء","space","بحث","دراسة","فلسفة","اقتصاد"]
+};
+const SOURCES = [
+  ["instagram.com","إنستغرام"],["tiktok.com","تيك توك"],["x.com","إكس"],["twitter.com","إكس"],["youtube.com","يوتيوب"],["youtu.be","يوتيوب"],
+  ["linkedin.com","لينكدإن"],["pinterest.","بنترست"],["medium.com","ميديوم"],["snapchat.com","سناب شات"],["threads.net","ثريدز"],["reddit.com","ريديت"],["behance.net","بيهانس"],["dribbble.com","دريبل"]
+];
+const AR = n => String(n).replace(/\d/g,d=>"٠١٢٣٤٥٦٧٨٩"[d]);
+const esc = s => String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const $ = s => document.querySelector(s);
+const uid = () => Date.now().toString(36)+Math.random().toString(36).slice(2,8);
+const DAY = 864e5;
+
+/* ===================== state & storage (Supabase) ===================== */
+const SB_URL = "https://hzcnuzlvnegaptmdcnzt.supabase.co";
+const SB_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh6Y251emx2bmVnYXB0bWRjbnp0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTQxNjA5MTMsImV4cCI6MjEwOTczNjkxM30.KdibV4rlzsB5w23UTEPASV8VlR6559vqJbbqi297Jy0";
+const sb = window.supabase.createClient(SB_URL, SB_KEY, { auth:{ persistSession:true, autoRefreshToken:true } });
+const S = { items:[], user:null, ai:true, filter:"all", q:"", picked:new Set(), view:"library" };
+S.sample = true; // AI available flag (kept name for UI checks)
+const CACHE_KEY = "luqta_cache_v1";
+
+const toRow = it => ({ id:it.id, type:it.type, url:it.url||"", text:it.text||"", why:it.why||"", img:it.img||"", source:it.source||"",
+  title:it.title||"", summary:it.summary||"", category:it.category||"أخرى", tags:it.tags||[], ocr:it.ocr||"",
+  opens:it.opens||0, fav:!!it.fav, created_at:it.createdAt, last_opened:it.lastOpened||null });
+const fromRow = r => ({ id:r.id, type:r.type, url:r.url, text:r.text, why:r.why, img:r.img, source:r.source, title:r.title,
+  summary:r.summary, category:CATS[r.category]?r.category:"أخرى", tags:r.tags||[], ocr:r.ocr, opens:r.opens, fav:r.fav,
+  createdAt:Number(r.created_at), lastOpened:r.last_opened?Number(r.last_opened):null });
+
+function cacheSave(){ try{ localStorage.setItem(CACHE_KEY+S.user.id, JSON.stringify(S.items.map(i=>({...i,img:i.img&&i.img.length<120000?i.img:""})))); }catch(e){} }
+function cacheLoad(){ try{ return JSON.parse(localStorage.getItem(CACHE_KEY+S.user.id)||"[]"); }catch(e){ return []; } }
+
+async function loadItems(){
+  S.items = cacheLoad(); renderAll();
+  setStatus(false,"يحمّل…");
+  const { data, error } = await sb.from("items").select("*").order("created_at",{ascending:false}).limit(2000);
+  if(error){ setStatus(false,"غير متصل — عرض النسخة المحفوظة"); return; }
+  S.items = data.map(fromRow); cacheSave(); setStatus(true,"متزامن"); renderAll();
+}
+function setStatus(ok,txt){ const el=$("#status"); el.classList.toggle("ok",ok); el.querySelector("span").textContent = txt; }
+
+async function putItem(item){
+  const i = S.items.findIndex(x=>x.id===item.id);
+  if(i>=0) S.items[i]=item; else S.items.unshift(item);
+  renderAll(); cacheSave();
+  const { error } = await sb.from("items").upsert(toRow(item));
+  if(error){
+    if(/img_size/.test(error.message||"") && item.img){ item.img=""; const r2 = await sb.from("items").upsert(toRow(item)); toast(r2.error?"تعذّر الحفظ":"حُفظت بدون الصورة (حجمها كبير)"); }
+    else toast("تعذّر الحفظ — تحقق من الاتصال");
+  }
+}
+async function removeItem(id){
+  S.items = S.items.filter(x=>x.id!==id); renderAll(); cacheSave();
+  const { error } = await sb.from("items").delete().eq("id",id);
+  if(error) toast("تعذّر الحذف");
+}
+
+/* ===================== auth ===================== */
+async function onSession(session){
+  S.user = session ? session.user : null;
+  $("#auth").classList.toggle("on", !S.user);
+  if(S.user) loadItems(); else { S.items=[]; renderAll(); }
+}
+sb.auth.getSession().then(({data})=>onSession(data.session));
+sb.auth.onAuthStateChange((ev,session)=>{ if(ev==="SIGNED_IN"||ev==="SIGNED_OUT") onSession(session); });
+const aMsg = t => $("#aMsg").textContent = t;
+$("#authForm").onsubmit = async e=>{
+  e.preventDefault(); aMsg("…");
+  const { error } = await sb.auth.signInWithPassword({ email:$("#aEmail").value.trim(), password:$("#aPass").value });
+  aMsg(error ? (/confirm/i.test(error.message)?"أكّد بريدك أولاً من الرسالة التي وصلتك":"البريد أو كلمة المرور غير صحيحة") : "");
+};
+$("#aUp").onclick = async ()=>{
+  const email=$("#aEmail").value.trim(), password=$("#aPass").value;
+  if(!email || password.length<6){ aMsg("أدخل بريداً وكلمة مرور (٦ أحرف على الأقل)"); return; }
+  aMsg("…");
+  const { data, error } = await sb.auth.signUp({ email, password, options:{ emailRedirectTo: location.origin+location.pathname } });
+  if(error) aMsg(/registered/i.test(error.message)?"هذا البريد مسجّل، اضغط دخول":"تعذّر إنشاء الحساب: "+error.message);
+  else if(!data.session) aMsg("أرسلنا لك رسالة تأكيد على بريدك، افتحها ثم عد وسجّل الدخول");
+};
+$("#logout").onclick = ()=> sb.auth.signOut();
+
+/* ===================== AI (via Supabase Edge Function → OpenAI) ===================== */
+function heuristic(text, url){
+  const t = (text+" "+(url||"")).toLowerCase();
+  let best="أخرى", score=0;
+  for(const [c,kws] of Object.entries(KEYWORDS)){
+    const s = kws.reduce((a,k)=>a+(t.includes(k.toLowerCase())?1:0),0);
+    if(s>score){score=s;best=c;}
+  }
+  const words = (text||"").split(/[\s،,.!؟?:;\-]+/).filter(w=>w.length>3);
+  return { category:best, tags:[...new Set(words)].slice(0,3), title:(text||url||"لقطة").slice(0,60), summary:(text||"").slice(0,140) };
+}
+function detectSource(url){
+  if(!url) return "";
+  try{ const h = new URL(url).hostname.replace("www.",""); for(const [k,v] of SOURCES) if(h.includes(k)) return v; return h; }catch(e){ return ""; }
+}
+async function callAI(prompt, {json=false, image=null}={}){
+  const { data, error } = await sb.functions.invoke("ai", { body:{ prompt, json, image } });
+  if(error){
+    let code="error"; try{ const b = await error.context.json(); code=b.error||code; }catch(e){}
+    if(code==="no_key"){ S.sample=false; toast("الذكاء الاصطناعي غير مفعّل بعد (مفتاح OpenAI)"); }
+    throw {code};
+  }
+  return data.text||"";
+}
+async function aiJSON(prompt, opts={}){
+  const t = await callAI(prompt+"\n\nأعد JSON صالحاً فقط.", {json:true, image:opts.image});
+  const m = t.match(/\{[\s\S]*\}/); return JSON.parse(m?m[0]:t);
+}
+async function aiText(prompt, onText){ const t = await callAI(prompt); onText(t); return t; }
+const blobToDataURL = b => new Promise(r=>{ const fr=new FileReader(); fr.onload=()=>r(fr.result); fr.readAsDataURL(b); });
+
+async function analyze({type,url,text,why,blob}){
+  const base = heuristic([text,why].join(" "), url);
+  if(!S.sample) return {...base, ocr:""};
+  const prompt = `أنت محرك تصنيف لتطبيق "لُقطة" الذي يجمع اهتمامات المستخدم من السوشيال والمقالات.
+حلّل اللقطة التالية وأعد JSON فقط بهذا الشكل:
+{"title":"عنوان عربي قصير وواضح (حد أقصى ٨ كلمات)","summary":"ملخص عربي في جملة أو جملتين يوضح الفكرة الأساسية ولماذا قد تكون مفيدة","category":"واحدة فقط من: ${CAT_NAMES.join("، ")}","tags":["٣ إلى ٥ وسوم عربية قصيرة"],"ocr":"النص الظاهر في الصورة إن وجدت (مختصر، حد أقصى ٤٠٠ حرف) أو فارغ"}
+
+نوع اللقطة: ${type==="image"?"صورة / سكرين شوت":type==="link"?"رابط":"نص"}
+${url?`الرابط: ${url}\n(لا يمكنك فتح الرابط؛ استنتج من الرابط نفسه ومن ملاحظة المستخدم)`:""}
+${text?`النص: ${text.slice(0,3000)}`:""}
+${why?`ملاحظة المستخدم عن سبب الحفظ: ${why}`:""}`;
+  try{
+    const image = blob ? await blobToDataURL(blob) : null;
+    const r = await aiJSON(prompt, {image});
+    return {
+      title: (r.title||base.title).toString().slice(0,90),
+      summary: (r.summary||"").toString().slice(0,300),
+      category: CATS[r.category] ? r.category : base.category,
+      tags: Array.isArray(r.tags)? r.tags.slice(0,5).map(String) : base.tags,
+      ocr: (r.ocr||"").toString().slice(0,600)
+    };
+  }catch(e){ return {...base, ocr:""}; }
+}
+
+/* ===================== images ===================== */
+function loadImg(file){ return new Promise((res,rej)=>{ const u=URL.createObjectURL(file); const im=new Image(); im.onload=()=>res(im); im.onerror=rej; im.src=u; }); }
+function toCanvas(im,max){ const s=Math.min(1,max/Math.max(im.width,im.height)); const c=document.createElement("canvas"); c.width=Math.round(im.width*s); c.height=Math.round(im.height*s); c.getContext("2d").drawImage(im,0,0,c.width,c.height); return c; }
+async function prepImage(file){
+  const im = await loadImg(file);
+  const thumb = toCanvas(im,560).toDataURL("image/jpeg",0.68);
+  const blob = await new Promise(r=>toCanvas(im,1200).toBlob(r,"image/jpeg",0.85));
+  return {thumb, blob};
+}
+
+/* ===================== render ===================== */
+function catChip(cat){ const k=CATS[cat]||CATS["أخرى"]; return `<span class="cat" style="background:${k.c}1A;color:${k.c}">${k.e} ${esc(cat)}</span>`; }
+function ago(ts){ const d=Math.floor((Date.now()-ts)/DAY); if(d<1) return "اليوم"; if(d===1) return "أمس"; if(d<30) return `قبل ${AR(d)} يوم`; const m=Math.floor(d/30); return m<12?`قبل ${AR(m)} شهر`:`قبل ${AR(Math.floor(m/12))} سنة`; }
+function typeIcon(it){ return it.type==="idea"?"💡":it.type==="link"?"🔗":it.type==="image"?"🖼️":"✍️"; }
+
+function filtered(){
+  const q = S.q.trim().toLowerCase();
+  return S.items
+    .filter(it => S.filter==="all" || (S.filter==="fav" ? it.fav : it.category===S.filter))
+    .filter(it => !q || [it.title,it.summary,it.text,it.ocr,it.url,it.why,(it.tags||[]).join(" "),it.category,it.source].join(" ").toLowerCase().includes(q))
+    .sort((a,b)=>b.createdAt-a.createdAt);
+}
+
+function renderLibrary(){
+  const n = S.items.length;
+  $("#greet").textContent = n ? `لديك ${AR(n)} لقطة` : "مكتبتك";
+  $("#greetSub").textContent = n ? "كل ما حفظته، مرتّب ومُصنّف وجاهز للعودة إليه." : "احفظ أي شيء يلفت انتباهك، ونحن نرتّبه.";
+  // chips
+  const counts = {}; S.items.forEach(i=>counts[i.category]=(counts[i.category]||0)+1);
+  const favs = S.items.filter(i=>i.fav).length;
+  const cats = Object.keys(counts).sort((a,b)=>counts[b]-counts[a]);
+  $("#chips").innerHTML = !n ? "" :
+    `<button class="chip ${S.filter==="all"?"on":""}" data-f="all">الكل <em>${AR(n)}</em></button>` +
+    (favs?`<button class="chip ${S.filter==="fav"?"on":""}" data-f="fav">★ المفضلة <em>${AR(favs)}</em></button>`:"") +
+    cats.map(c=>`<button class="chip ${S.filter===c?"on":""}" data-f="${esc(c)}"><span class="dot" style="background:${(CATS[c]||CATS["أخرى"]).c}"></span>${esc(c)} <em>${AR(counts[c])}</em></button>`).join("");
+  // grid
+  const list = filtered();
+  $("#grid").innerHTML = list.map(it=>`
+    <article class="item ${it.type==="idea"?"idea":""}" data-id="${it.id}">
+      ${it.img?`<img src="${it.img}" alt="">`:""}
+      <div class="b">
+        ${catChip(it.category)}
+        <h4>${esc(it.title)}</h4>
+        ${it.summary?`<p>${esc(it.summary)}</p>`:""}
+        ${(it.tags||[]).length?`<div class="tags">${it.tags.slice(0,4).map(t=>`<span class="tag">#${esc(t)}</span>`).join("")}</div>`:""}
+        <div class="meta"><span>${typeIcon(it)} ${esc(it.source||"")}</span><span>${it.fav?"★ ":""}${ago(it.createdAt)}</span></div>
+      </div>
+    </article>`).join("");
+  // empty
+  $("#emptyLib").innerHTML = !n ? `
+    <div class="empty"><div class="art">🗂️</div><h3>ابدأ بأول لقطة</h3>
+    <p>سكرين شوت من إنستغرام، رابط مقال، أو فكرة خطرت لك. احفظها هنا وسنصنّفها تلقائياً.</p>
+    <div class="row" style="justify-content:center;margin-top:18px"><button class="btn accent" data-open-add>+ أضف لقطة</button><button class="btn ghost" id="seedBtn">جرّب بأمثلة جاهزة</button></div></div>`
+    : (!list.length ? `<div class="empty"><div class="art">🔍</div><p>لا توجد نتائج مطابقة.</p></div>` : "");
+  renderResurface();
+}
+
+let resurfaceId = null;
+function pickResurface(){
+  const old = S.items.filter(i=>i.type!=="idea" && Date.now()-(i.lastOpened||i.createdAt) > 3*DAY);
+  const pool = old.length ? old : S.items.filter(i=>i.type!=="idea");
+  if(pool.length<3){ resurfaceId=null; return; }
+  const w = pool.filter(i=>i.id!==resurfaceId);
+  resurfaceId = (w[Math.floor(Math.random()*w.length)]||pool[0]).id;
+}
+function renderResurface(){
+  if(!resurfaceId || !S.items.find(i=>i.id===resurfaceId)) pickResurface();
+  const it = S.items.find(i=>i.id===resurfaceId);
+  if(!it){ $("#resurface").innerHTML=""; return; }
+  $("#resurface").innerHTML = `<div class="resurface">
+    <div class="thumb" style="${it.img?`background-image:url(${it.img})`:""}">${it.img?"":(CATS[it.category]||CATS["أخرى"]).e}</div>
+    <div style="min-width:0;z-index:1"><div class="k">↺ من ذاكرتك · حفظتها ${ago(it.createdAt)}</div><h3>${esc(it.title)}</h3><p>${esc(it.summary||"")}</p></div>
+    <div class="acts"><button class="btn light" data-id="${it.id}">افتحها</button><button class="btn ghost" id="nextRes">غيرها</button></div></div>`;
+}
+
+function renderInsights(){
+  const el = $("#insightsBody"); const items = S.items.filter(i=>i.type!=="idea");
+  if(items.length<3){ el.innerHTML = `<div class="empty"><div class="art">🪞</div><h3>نحتاج لقطات أكثر</h3><p>احفظ ٣ لقطات على الأقل لتبدأ الصورة في الظهور.</p></div>`; return; }
+  const now = Date.now();
+  const month = items.filter(i=>now-i.createdAt<30*DAY).length;
+  const counts = {}; items.forEach(i=>counts[i.category]=(counts[i.category]||0)+1);
+  const cats = Object.entries(counts).sort((a,b)=>b[1]-a[1]);
+  const max = cats[0][1];
+  const revisited = items.filter(i=>(i.opens||0)>0).length;
+  const revisitPct = Math.round(revisited/items.length*100);
+  // trend
+  const cur={},prev={};
+  items.forEach(i=>{ const a=now-i.createdAt; if(a<30*DAY) cur[i.category]=(cur[i.category]||0)+1; else if(a<60*DAY) prev[i.category]=(prev[i.category]||0)+1; });
+  let rising=null, rs=0; for(const c in cur){ const d=cur[c]-(prev[c]||0); if(d>rs){rs=d;rising=c;} }
+  // weeks
+  const weeks=[]; for(let w=7;w>=0;w--){ const s=now-(w+1)*7*DAY, e=now-w*7*DAY; weeks.push({w,n:items.filter(i=>i.createdAt>=s&&i.createdAt<e).length}); }
+  const wmax = Math.max(1,...weeks.map(w=>w.n));
+  // tags
+  const tc={}; items.forEach(i=>(i.tags||[]).forEach(t=>tc[t]=(tc[t]||0)+1));
+  const tags = Object.entries(tc).sort((a,b)=>b[1]-a[1]).slice(0,22); const tmax = tags.length?tags[0][1]:1;
+  // sources
+  const sc={}; items.forEach(i=>{const s=i.source||(i.type==="note"?"ملاحظة":"صورة"); sc[s]=(sc[s]||0)+1;});
+  const srcs = Object.entries(sc).sort((a,b)=>b[1]-a[1]).slice(0,6); const smax=srcs[0][1];
+  // forgotten
+  const forgot = items.filter(i=>!(i.opens>0) && now-i.createdAt>7*DAY).sort((a,b)=>a.createdAt-b.createdAt).slice(0,5);
+  const topPct = Math.round(cats[0][1]/items.length*100);
+
+  el.innerHTML = `
+  <div class="kpis">
+    <div class="kpi"><div class="n">${AR(items.length)}</div><div class="l">لقطة محفوظة</div></div>
+    <div class="kpi"><div class="n">${AR(month)}</div><div class="l">في آخر ٣٠ يوماً</div></div>
+    <div class="kpi"><div class="n">${AR(cats.length)}</div><div class="l">مجال اهتمام</div></div>
+    <div class="kpi"><div class="n">${AR(revisitPct)}٪</div><div class="l">نسبة ما عدت إليه</div></div>
+  </div>
+  <div class="insight-hero"><div class="ic">${CATS[cats[0][0]].e}</div><div>
+    <h3>اهتمامك الأول هو «${esc(cats[0][0])}» بنسبة ${AR(topPct)}٪ من محفوظاتك</h3>
+    <p>${rising && rising!==cats[0][0] ? `واهتمامك بـ«${esc(rising)}» في صعود خلال الشهر الأخير. ` : ""}${revisitPct<30?`عدت إلى ${AR(revisitPct)}٪ فقط مما حفظته، فالكثير من أفكارك ينتظرك في الأسفل.`:`أنت تعود إلى محفوظاتك فعلاً، وهذه عادة نادرة.`}</p>
+  </div></div>
+  <div class="panels" style="margin-top:16px">
+    <div class="panel"><h3>خريطة اهتماماتك <small>حسب عدد اللقطات</small></h3>
+      <div class="bars">${cats.map(([c,v])=>`<div class="r"><span>${CATS[c].e} ${esc(c)}</span><div class="t"><i style="width:${v/max*100}%;background:${CATS[c].c}"></i></div><span class="v">${AR(v)}</span></div>`).join("")}</div>
+    </div>
+    <div class="panel"><h3>نشاطك <small>آخر ٨ أسابيع</small></h3>
+      <div class="weeks">${weeks.map(w=>`<div class="c ${w.w===0?"now":""}"><b>${w.n?AR(w.n):""}</b><i style="height:${w.n/wmax*100}%"></i><span>${w.w===0?"الآن":"-"+AR(w.w)}</span></div>`).join("")}</div>
+    </div>
+    <div class="panel"><h3>كلماتك المتكررة</h3>
+      <div class="cloud">${tags.map(([t,v])=>`<span style="font-size:${12+v/tmax*14}px;opacity:${.55+v/tmax*.45}">${esc(t)}</span>`).join(" · ")||'<span class="hint">لا وسوم بعد</span>'}</div>
+    </div>
+    <div class="panel"><h3>من أين تأتي اهتماماتك</h3>
+      <div class="bars">${srcs.map(([s,v])=>`<div class="r"><span>${esc(s)}</span><div class="t"><i style="width:${v/smax*100}%;background:var(--deep)"></i></div><span class="v">${AR(v)}</span></div>`).join("")}</div>
+    </div>
+    <div class="panel"><h3>لقطات منسية <small>لم تفتحها منذ حفظها</small></h3>
+      <div class="forgot">${forgot.length?forgot.map(i=>`<div class="f" data-id="${i.id}"><div class="th" style="${i.img?`background-image:url(${i.img})`:""}">${i.img?"":CATS[i.category]?.e||"📌"}</div><div><h5>${esc(i.title)}</h5><span>${ago(i.createdAt)} · ${esc(i.category)}</span></div></div>`).join(""):'<p class="hint">لا شيء منسي. أحسنت!</p>'}</div>
+    </div>
+    <div class="panel"><h3>بورتريه اهتماماتك <small>بالذكاء الاصطناعي</small></h3>
+      <p class="hint" style="margin:0 0 12px">قراءة لشخصيتك الإبداعية من خلال ما تحفظه، وأين يمكن أن تقودك.</p>
+      <button class="btn primary" id="portraitBtn" ${S.sample?"":"disabled"}>اكتب بورتريه عني</button>
+      ${S.sample?"":'<p class="hint">الذكاء الاصطناعي غير مفعّل بعد.</p>'}
+      <div class="portrait" id="portraitOut"></div>
+    </div>
+  </div>`;
+}
+
+function renderLab(){
+  const items = S.items.slice().sort((a,b)=>b.createdAt-a.createdAt);
+  [...S.picked].forEach(id=>{ if(!S.items.find(i=>i.id===id)) S.picked.delete(id); });
+  $("#picklist").innerHTML = items.length ? items.map(i=>`<div class="pick ${S.picked.has(i.id)?"on":""}" data-pick="${i.id}">
+    <div class="th" style="${i.img?`background-image:url(${i.img})`:""}">${i.img?"":(CATS[i.category]||CATS["أخرى"]).e}</div>
+    <div class="tx"><b>${esc(i.title)}</b><span>${esc(i.category)}</span></div>${S.picked.has(i.id)?"✓":""}</div>`).join("")
+    : '<p class="hint">أضف لقطات أولاً.</p>';
+  $("#pickCount").textContent = AR(S.picked.size)+" مختارة";
+  $("#selBar").innerHTML = [...S.picked].map(id=>{const i=S.items.find(x=>x.id===id); return i?catChip(i.category):""}).join("");
+  $("#genIdeas").disabled = S.picked.size<2 || !S.sample;
+  $("#askBtn").disabled = !S.sample || !S.items.length;
+  if(!S.sample && !$("#ideasOut").innerHTML) $("#ideasOut").innerHTML = '<p class="hint">الذكاء الاصطناعي غير مفعّل بعد.</p>';
+}
+
+function renderAll(){ renderLibrary(); if(S.view==="insights") renderInsights(); if(S.view==="lab") renderLab(); }
+
+/* ===================== detail ===================== */
+function openDetail(id){
+  const it = S.items.find(i=>i.id===id); if(!it) return;
+  const upd = {...it, opens:(it.opens||0)+1, lastOpened:Date.now()};
+  putItem(upd);
+  const d = $("#detail");
+  d.innerHTML = `<button class="x" data-close>×</button>
+    ${it.img?`<img class="full" src="${it.img}" alt="">`:""}
+    ${catChip(it.category)} <span class="hint">· ${typeIcon(it)} ${esc(it.source||"")} · ${ago(it.createdAt)}</span>
+    <div style="margin-top:10px"><input class="ttl" id="dTitle" value="${esc(it.title)}"></div>
+    ${it.summary?`<p class="sum">${esc(it.summary)}</p>`:""}
+    ${it.url?`<p style="margin-top:10px"><a href="${esc(it.url)}" target="_blank" rel="noopener" class="btn ghost" dir="ltr">↗ ${esc(it.url.slice(0,48))}${it.url.length>48?"…":""}</a></p>`:""}
+    ${it.text?`<div class="content">${esc(it.text)}</div>`:""}
+    ${it.why?`<p class="hint" style="margin-top:10px">ملاحظتك: ${esc(it.why)}</p>`:""}
+    ${it.ocr?`<details style="margin-top:10px"><summary class="hint" style="cursor:pointer">النص المستخرج من الصورة</summary><div class="content">${esc(it.ocr)}</div></details>`:""}
+    <label class="f">التصنيف</label>
+    <select class="inp" id="dCat">${Object.keys(CATS).map(c=>`<option ${c===it.category?"selected":""}>${c}</option>`).join("")}</select>
+    <label class="f">الوسوم (افصل بفاصلة)</label>
+    <input class="inp" id="dTags" value="${esc((it.tags||[]).join("، "))}">
+    <div class="mfoot">
+      <button class="btn primary" id="dSave">حفظ التعديلات</button>
+      <button class="btn ghost" id="dFav">${it.fav?"★ في المفضلة":"☆ للمفضلة"}</button>
+      <button class="btn ghost" id="dDel" style="margin-inline-start:auto;color:#B23B1E">حذف</button>
+    </div>
+    <div class="confirm" id="dConfirm">متأكد من حذف هذه اللقطة؟ <button class="btn accent" id="dDelYes" style="padding:6px 14px;margin-inline-start:8px">نعم، احذف</button></div>`;
+  $("#detScrim").classList.add("on");
+  $("#dSave").onclick = ()=>{ const cur=S.items.find(i=>i.id===id); putItem({...cur, title:$("#dTitle").value.trim()||cur.title, category:$("#dCat").value, tags:$("#dTags").value.split(/[،,]/).map(s=>s.trim()).filter(Boolean)}); close("#detScrim"); toast("تم الحفظ"); };
+  $("#dFav").onclick = ()=>{ const cur=S.items.find(i=>i.id===id); putItem({...cur, fav:!cur.fav}); $("#dFav").textContent = !cur.fav?"★ في المفضلة":"☆ للمفضلة"; };
+  $("#dDel").onclick = ()=> $("#dConfirm").classList.add("on");
+  $("#dDelYes").onclick = ()=>{ removeItem(id); close("#detScrim"); toast("حُذفت"); };
+}
+
+/* ===================== add flow ===================== */
+let addType = "image", pendingImg = null;
+function openAdd(type){
+  addType = type||"image"; pendingImg=null;
+  $("#linkUrl").value=""; $("#noteText").value=""; $("#addWhy").value="";
+  $("#dropInner").innerHTML = `<div style="font-size:34px">🖼️</div>اسحب الصورة هنا، أو اضغط للاختيار<div class="hint">يمكنك أيضاً لصقها مباشرة (Ctrl/⌘ + V)</div>`;
+  setAddType(addType);
+  $("#aiNote").textContent = S.sample ? "سيُحلَّل المحتوى ويُصنَّف تلقائياً" : "تصنيف تلقائي بالكلمات المفتاحية";
+  $("#saveBtn").disabled=false; $("#saveBtn").textContent="احفظ وصنّف";
+  $("#addScrim").classList.add("on");
+}
+function setAddType(t){
+  addType=t;
+  document.querySelectorAll("#addSeg button").forEach(b=>b.classList.toggle("on",b.dataset.t===t));
+  document.querySelectorAll("[data-pane]").forEach(p=>p.hidden = p.dataset.pane!==t);
+}
+async function handleFile(file){
+  if(!file || !file.type.startsWith("image/")) return;
+  try{
+    pendingImg = await prepImage(file);
+    $("#dropInner").innerHTML = `<img src="${pendingImg.thumb}" alt=""><div class="hint">اضغط لتغيير الصورة</div>`;
+  }catch(e){ toast("تعذّر قراءة الصورة"); }
+}
+async function saveNew(){
+  const why = $("#addWhy").value.trim();
+  let url="", text="", img="", blob=null;
+  if(addType==="image"){ if(!pendingImg){ toast("اختر صورة أولاً"); return; } img=pendingImg.thumb; blob=pendingImg.blob; }
+  if(addType==="link"){ url=$("#linkUrl").value.trim(); if(!url){ toast("أدخل الرابط"); return; } if(!/^https?:\/\//.test(url)) url="https://"+url; }
+  if(addType==="note"){ text=$("#noteText").value.trim(); if(!text){ toast("اكتب النص"); return; } }
+  const btn=$("#saveBtn"); btn.disabled=true; btn.innerHTML=`<span class="spin"></span> ${S.sample?"يحلّل ويصنّف…":"يحفظ…"}`;
+  const a = await analyze({type:addType,url,text,why,blob});
+  const item = { id:uid(), type:addType, url, text, why, img, source: detectSource(url) || (addType==="image"?"صورة":"ملاحظة"),
+    title:a.title, summary:a.summary, category:a.category, tags:a.tags, ocr:a.ocr||"", createdAt:Date.now(), opens:0, fav:false };
+  close("#addScrim");
+  await putItem(item);
+  toast(`${CATS[item.category].e} صُنّفت في «${item.category}»`);
+}
+
+/* ===================== lab ===================== */
+function compact(i){ return `- [${i.category}] ${i.title}${i.summary?": "+i.summary:""}${(i.tags||[]).length?" (وسوم: "+i.tags.join("، ")+")":""}${i.why?" — ملاحظة: "+i.why:""}`; }
+async function genIdeas(){
+  const sel = [...S.picked].map(id=>S.items.find(i=>i.id===id)).filter(Boolean);
+  const out=$("#ideasOut"); out.innerHTML=`<div class="loading"><span class="spin"></span> يبحث عن التقاطعات بين لقطاتك…</div>`;
+  $("#genIdeas").disabled=true;
+  const prompt = `أنت شريك إبداعي في تطبيق "لُقطة". المستخدم اختار هذه اللقطات من اهتماماته:
+${sel.map(compact).join("\n")}
+
+ولّد ٣ أفكار جديدة وأصيلة تنشأ من التقاطع بين هذه اللقطات (لا تكرر لقطة واحدة فقط؛ كل فكرة يجب أن تربط بين لقطتين على الأقل بطريقة غير متوقعة). الأفكار قد تكون مشروعاً أو محتوى أو تصميماً أو منتجاً أو تجربة.
+أعد JSON فقط: {"ideas":[{"title":"اسم الفكرة","description":"وصف في جملتين","why":"كيف ربطت بين اللقطات","steps":["خطوة أولى عملية","خطوة ثانية","خطوة ثالثة"]}]}
+اكتب بالعربية الواضحة.`;
+  try{
+    const r = await aiJSON(prompt);
+    const ideas = (r.ideas||[]).slice(0,4);
+    window._ideas = ideas;
+    out.innerHTML = `<div class="ideas">${ideas.map((d,k)=>`<div class="idea-card"><h4>💡 ${esc(d.title)}</h4><p>${esc(d.description)}</p>
+      ${d.why?`<div class="why">🔗 ${esc(d.why)}</div>`:""}
+      ${(d.steps||[]).length?`<ol>${d.steps.map(s=>`<li>${esc(s)}</li>`).join("")}</ol>`:""}
+      <div class="row"><button class="btn ghost" data-save-idea="${k}">احفظ في مكتبتي</button></div></div>`).join("")}</div>`;
+  }catch(e){
+    out.innerHTML = `<p class="hint">${e&&e.code==="rate_limited"?"طلبات كثيرة، انتظر قليلاً ثم حاول.":"تعذّر توليد الأفكار، حاول مرة أخرى."}</p>`;
+  }
+  $("#genIdeas").disabled = S.picked.size<2;
+}
+async function askSaves(){
+  const q=$("#askQ").value.trim(); if(!q) return;
+  const out=$("#askOut"); out.innerHTML=`<div class="loading"><span class="spin"></span> يقرأ محفوظاتك…</div>`;
+  $("#askBtn").disabled=true;
+  const ctx = S.items.slice().sort((a,b)=>b.createdAt-a.createdAt).slice(0,200).map(compact).join("\n");
+  const prompt = `أنت مساعد المستخدم في تطبيق "لُقطة"، وهذه كل اللقطات التي حفظها:
+${ctx}
+
+سؤال المستخدم: ${q}
+أجب بالعربية بإيجاز ووضوح، واستند إلى لقطاته واذكر عناوينها عند الإشارة إليها. لا تستخدم تنسيق ماركداون ثقيل؛ استخدم أسطراً وترقيماً بسيطاً فقط.`;
+  try{
+    await aiText(prompt, t=>{ out.textContent=t; });
+  }catch(e){ out.textContent = e&&e.code==="rate_limited"?"طلبات كثيرة، انتظر قليلاً.":"تعذّر الحصول على إجابة."; }
+  $("#askBtn").disabled=false;
+}
+async function portrait(){
+  const out=$("#portraitOut"); out.innerHTML=`<div class="loading"><span class="spin"></span> يتأمل اهتماماتك…</div>`;
+  const ctx = S.items.filter(i=>i.type!=="idea").slice(0,200).map(compact).join("\n");
+  const prompt = `هذه لقطات حفظها شخص من السوشيال والمقالات خلال الفترة الماضية:
+${ctx}
+
+اكتب له "بورتريه اهتمامات" بالعربية، بصيغة المخاطب، في ٣ فقرات قصيرة:
+١) ما الذي يجذبه فعلاً وما الخيط المشترك الخفي بين اهتماماته.
+٢) ما الذي يقوله ذلك عن شخصيته الإبداعية، بصدق ودون مجاملة.
+٣) اقتراح محدد لمشروع أو اتجاه إبداعي يجمع أقوى اهتماماته.
+بدون عناوين أو ماركداون.`;
+  try{ await aiText(prompt, t=>{ out.textContent=t; }); }
+  catch(e){ out.textContent="تعذّر الكتابة الآن، حاول لاحقاً."; }
+}
+
+/* ===================== seed (user-initiated demo) ===================== */
+async function seed(){
+  const now=Date.now();
+  const demo = [
+    ["link","https://www.instagram.com/p/demo1","لوحة ألوان ترابية لهوية مقهى مختص","تصميم","ألوان دافئة مستوحاة من الطين والقهوة تصلح لهوية بصرية هادئة.",["هوية بصرية","ألوان","مقاهي"],2],
+    ["note","","قاعدة الدقيقتين في الإنتاجية","تطوير الذات","إذا كانت المهمة تأخذ أقل من دقيقتين فأنجزها فوراً بدل تأجيلها.",["إنتاجية","عادات"],5],
+    ["link","https://x.com/demo/status/1","كيف تبني منتجاً رقمياً بدون فريق","ريادة أعمال","سلسلة تغريدات عن إطلاق منتج صغير مربح بأدوات بدون كود.",["منتج","بدون كود","مشاريع صغيرة"],9],
+    ["link","https://www.youtube.com/watch?v=demo","أساسيات الخط العربي الحديث في الشعارات","تصميم","شرح لدمج الخط الكوفي بأسلوب عصري في تصميم الشعارات.",["خط عربي","شعارات","تايبوغرافي"],14],
+    ["link","https://www.tiktok.com/@demo/video/1","وصفة كيكة الزعفران والهيل","طبخ","حلى سعودي بنكهة عصرية يصلح للضيافة.",["حلى","زعفران"],20],
+    ["link","https://medium.com/demo","لماذا تنجح العلامات التي تحكي قصة","تسويق","مقال عن السرد القصصي كأداة لبناء ولاء العملاء.",["سرد قصصي","براند","ولاء"],26],
+    ["note","","فكرة: سلسلة محتوى عن أماكن منسية في المدينة","كتابة ومحتوى","توثيق المباني القديمة وقصصها بصور وفيديوهات قصيرة.",["محتوى","توثيق","مدن"],33],
+    ["link","https://www.pinterest.com/pin/demo","تصاميم داخلية بإضاءة طبيعية","فن وإلهام","مساحات بسيطة تعتمد على الضوء والخامات الطبيعية.",["إضاءة","ديكور","بساطة"],41],
+    ["link","https://www.instagram.com/p/demo2","تصميم واجهة تطبيق بأسلوب الكروت","تصميم","واجهة استخدام تعتمد على البطاقات والمساحات البيضاء.",["واجهات","تطبيقات"],48],
+    ["link","https://x.com/demo/status/2","الذكاء الاصطناعي في أدوات المصممين","تقنية","أدوات جديدة تولّد مسودات تصميم من وصف نصي.",["ذكاء اصطناعي","أدوات"],3],
+  ];
+  for(const [type,url,title,category,summary,tags,days] of demo){
+    const item = {id:uid(),type,url,text:type==="note"?summary:"",why:"",img:"",source:detectSource(url)||"ملاحظة",title,summary,category,tags,ocr:"",createdAt:now-days*DAY,opens:days%3===0?1:0,fav:false};
+    S.items.unshift(item);
+  }
+  await sb.from("items").upsert(S.items.slice(0,demo.length).map(toRow)); cacheSave();
+  renderAll(); toast("أُضيفت ١٠ لقطات للتجربة");
+}
+
+/* ===================== events ===================== */
+function close(sel){ $(sel).classList.remove("on"); }
+let tt; function toast(m){ const t=$("#toast"); t.textContent=m; t.classList.add("on"); clearTimeout(tt); tt=setTimeout(()=>t.classList.remove("on"),2600); }
+function go(v){
+  S.view=v; document.querySelectorAll("nav.tabs button").forEach(b=>b.classList.toggle("on",b.dataset.v===v));
+  document.querySelectorAll(".view").forEach(s=>s.classList.toggle("on",s.id==="v-"+v));
+  if(v==="insights") renderInsights(); if(v==="lab") renderLab();
+  window.scrollTo({top:0});
+}
+document.querySelectorAll("nav.tabs button").forEach(b=>b.onclick=()=>go(b.dataset.v));
+$("#fab").onclick=()=>openAdd("image");
+document.addEventListener("click",e=>{
+  const t=e.target;
+  if(t.closest("[data-close]") || t.classList.contains("scrim")) { (t.closest(".scrim")||t).classList.remove("on"); return; }
+  if(t.closest("[data-open-add]")) return openAdd("image");
+  if(t.id==="seedBtn") return seed();
+  if(t.id==="nextRes"){ pickResurface(); renderResurface(); return; }
+  if(t.id==="portraitBtn") return portrait();
+  const chip=t.closest("[data-f]"); if(chip){ S.filter=chip.dataset.f; renderLibrary(); return; }
+  const pk=t.closest("[data-pick]"); if(pk){ const id=pk.dataset.pick; if(S.picked.has(id)) S.picked.delete(id); else if(S.picked.size<5) S.picked.add(id); else toast("خمس لقطات كحد أقصى"); renderLab(); return; }
+  const si=t.closest("[data-save-idea]"); if(si){ const d=window._ideas[+si.dataset.saveIdea]; putItem({id:uid(),type:"idea",url:"",text:`${d.description}\n\n${(d.steps||[]).map((s,k)=>`${AR(k+1)}. ${s}`).join("\n")}`,why:d.why||"",img:"",source:"مختبر الأفكار",title:d.title,summary:d.description,category:"أفكاري",tags:["فكرة مولّدة"],ocr:"",createdAt:Date.now(),opens:0,fav:false}); si.textContent="✓ حُفظت"; si.disabled=true; return; }
+  const card=t.closest("[data-id]"); if(card && !t.closest(".modal")) return openDetail(card.dataset.id);
+});
+document.addEventListener("keydown",e=>{ if(e.key==="Escape") document.querySelectorAll(".scrim.on").forEach(s=>s.classList.remove("on")); });
+$("#q").oninput=e=>{ S.q=e.target.value; renderLibrary(); };
+document.querySelectorAll("#addSeg button").forEach(b=>b.onclick=()=>setAddType(b.dataset.t));
+$("#drop").onclick=()=>$("#file").click();
+$("#file").onchange=e=>handleFile(e.target.files[0]);
+const drop=$("#drop");
+drop.ondragover=e=>{e.preventDefault();drop.classList.add("over");};
+drop.ondragleave=()=>drop.classList.remove("over");
+drop.ondrop=e=>{e.preventDefault();drop.classList.remove("over");handleFile(e.dataTransfer.files[0]);};
+document.addEventListener("paste",e=>{
+  const f=[...(e.clipboardData?.files||[])].find(f=>f.type.startsWith("image/"));
+  if(f){ if(!$("#addScrim").classList.contains("on")) openAdd("image"); setAddType("image"); handleFile(f); return; }
+  const txt=e.clipboardData?.getData("text")||"";
+  if(!$("#addScrim").classList.contains("on") && document.activeElement.tagName!=="INPUT" && document.activeElement.tagName!=="TEXTAREA" && txt){
+    if(/^https?:\/\//.test(txt.trim())){ openAdd("link"); $("#linkUrl").value=txt.trim(); } else { openAdd("note"); $("#noteText").value=txt; }
+  }
+});
+$("#saveBtn").onclick=saveNew;
+$("#randomMix").onclick=()=>{
+  S.picked.clear(); const by={}; S.items.forEach(i=>(by[i.category]=by[i.category]||[]).push(i));
+  const cats=Object.keys(by).sort(()=>Math.random()-.5).slice(0,3);
+  cats.forEach(c=>S.picked.add(by[c][Math.floor(Math.random()*by[c].length)].id));
+  if(S.picked.size<2) toast("أضف لقطات من مجالات مختلفة أولاً");
+  renderLab();
+};
+$("#clearPick").onclick=()=>{ S.picked.clear(); renderLab(); };
+$("#genIdeas").onclick=genIdeas;
+$("#askBtn").onclick=askSaves;
+
+renderAll();
+if("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js").catch(()=>{});
+</script>
+</body>
+</html>
